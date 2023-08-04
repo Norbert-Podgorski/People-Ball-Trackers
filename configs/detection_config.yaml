@@ -1,0 +1,20 @@
+frames_loader_config:
+  frames_path: "../example_data/test/frames/passes_1"
+  resize: [544, 960]
+used_detector:
+  name: "PretrainedYOLODetector"
+  pretrained_yolo_detector_config:
+    torchhub_yolo_config:
+      repo_or_dir: "../ultralytics_yolov5_master"
+      path: "../ultralytics_yolov5_master/yolov5s.pt"
+      source: "local"
+      model: "custom"
+      skip_validation: False
+      force_reload: False
+    selected_classes:
+      person:
+        class_id: 0
+        confidence_threshold: 0.5
+      ball:
+        class_id: 32
+        confidence_threshold: 0.5
