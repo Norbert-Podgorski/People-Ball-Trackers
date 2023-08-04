@@ -12,6 +12,6 @@ class Detector(abc.ABC):
 
 
 class Detection(NamedTuple):
-    bounding_box: np.ndarray
+    bounding_box: torch.Tensor
     detected_class: str
     confidence: float

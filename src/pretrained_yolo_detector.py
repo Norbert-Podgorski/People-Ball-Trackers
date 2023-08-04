@@ -52,7 +52,7 @@ class PretrainedYOLODetector(Detector):
         yolo_output_confidence_index = 4
         yolo_output_detected_class_index = 5
         min_x, min_y, max_x, max_y = yolo_output[yolo_output_bbox_indexes]
-        bounding_box_coordinates = np.array([[min_x, min_y], [max_x, max_y]])
+        bounding_box_coordinates = torch.tensor([[min_x, min_y], [max_x, max_y]])
         detected_class = self.yolo_class_to_name.get(yolo_output[yolo_output_detected_class_index].item())
         confidence = yolo_output[yolo_output_confidence_index].item()
         return Detection(bounding_box=bounding_box_coordinates, detected_class=detected_class, confidence=confidence)
