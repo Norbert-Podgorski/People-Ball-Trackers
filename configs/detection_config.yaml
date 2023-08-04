@@ -1,3 +1,4 @@
+batch_size: 10
 frames_loader_config:
   frames_path: "../example_data/test/frames/passes_1"
   resize: [544, 960]
@@ -21,5 +22,5 @@ used_detector:
 visualizer_config:
   frames_path: "../visualizations/frames/pretrained_yolo_detector/passes_1"
   video_path: "../visualizations/video/pretrained_yolo_detector/passes_1"
-  fps: 20
+  fps: 10
   size: [960, 544]
