@@ -1,4 +1,3 @@
-import glob
 import os
 from typing import List, Dict, Tuple
 
@@ -9,7 +8,7 @@ import torch
 from src.detectors.detector import Detection
 
 VISUALIZATION_COLORS: Dict[str, Tuple[int, int, int]] = {
-    "ball": (255, 0, 0),
+    "ball":   (255, 0, 0),
     "person": (0, 0, 255)
 }
 
@@ -19,8 +18,7 @@ class Visualizer:
         self.frames_path = frames_path
         self._create_path_if_not_exists(self.frames_path)
         self._create_path_if_not_exists(video_path)
-        self.writer = cv2.VideoWriter(f'{video_path}/video.avi',cv2.VideoWriter_fourcc(*"mp4v"), fps, size)
-        print(self.writer.isOpened())
+        self.writer = cv2.VideoWriter(f'{video_path}/video.avi', cv2.VideoWriter_fourcc(*"mp4v"), fps, size)
 
     def visualize(self, frames: torch.Tensor, detections: List[List[Detection]]):
         for frame_idx, (frame, detections_for_frame) in enumerate(zip(frames, detections)):
@@ -46,10 +44,3 @@ class Visualizer:
     def _create_path_if_not_exists(path: str) -> None:
         if not os.path.exists(path):
             os.makedirs(path)
-
-    # def _write_video(self):
-    #     for filename in glob.glob(f'{self.frames_path}*.jpg'):
-    #         img = cv2.imread(filename)
-    #         self.writer.write(img)
-    #
-    #     self.writer.release()

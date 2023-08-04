@@ -19,7 +19,7 @@ used_detector:
         class_id: 32
         confidence_threshold: 0.5
 visualizer_config:
-  frames_path: "../visualizations/frames/passes_1"
-  video_path: "../visualizations/video/passes_1"
+  frames_path: "../visualizations/frames/pretrained_yolo_detector/passes_1"
+  video_path: "../visualizations/video/pretrained_yolo_detector/passes_1"
   fps: 20
   size: [960, 544]

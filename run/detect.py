@@ -13,7 +13,7 @@ def detect(config: Dict[str, Any]):
     detector = DetectorFactory.create(**config["used_detector"])
     visualizer = Visualizer(**config["visualizer_config"])
 
-    frames = frames_loader.load_subset_frames(subset=5)
+    frames = frames_loader.load_all_frames()
     detections = detector.detect(frames)
     visualizer.visualize(frames, detections)
 
