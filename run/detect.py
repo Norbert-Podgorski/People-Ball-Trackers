@@ -1,6 +1,5 @@
 from typing import Dict, Any
 
-import numpy as np
 import yaml
 from yaml import SafeLoader
 

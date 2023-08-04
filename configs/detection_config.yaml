@@ -5,9 +5,9 @@ used_detector:
   name: "PretrainedYOLODetector"
   pretrained_yolo_detector_config:
     torchhub_yolo_config:
-      repo_or_dir: "../ultralytics_yolov5_master"
+      repo_or_dir: "ultralytics/yolov5"
       path: "../ultralytics_yolov5_master/yolov5s.pt"
-      source: "local"
+      source: "github"
       model: "custom"
       skip_validation: False
       force_reload: False
