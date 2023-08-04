@@ -1,13 +1,14 @@
-import abc
-from typing import NamedTuple
+from __future__ import annotations
 
-import numpy as np
+import abc
+from typing import NamedTuple, List
+
 import torch
 
 
 class Detector(abc.ABC):
     @abc.abstractmethod
-    def detect(self, images: torch.Tensor) -> torch.Tensor:
+    def detect(self, images: torch.Tensor) -> List[List[Detection]]:
         pass
 
 

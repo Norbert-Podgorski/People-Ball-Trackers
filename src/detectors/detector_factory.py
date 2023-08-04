@@ -1,7 +1,7 @@
 from typing import Dict, Callable, Any
 
-from src.detector import Detector
-from src.pretrained_yolo_detector import PretrainedYOLODetector
+from src.detectors.detector import Detector
+from src.detectors.pretrained_yolo_detector import PretrainedYOLODetector
 
 
 def create_pretrained_yolo_detector(**detector_config: Dict[str, Any]) -> Detector:

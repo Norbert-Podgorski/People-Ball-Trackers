@@ -1,11 +1,9 @@
-import sys
 from typing import Dict, Any, List
 
-import numpy as np
 import torch
 from torch import nn
 
-from src.detector import Detector, Detection
+from src.detectors.detector import Detector, Detection
 
 
 class PretrainedYOLODetector(Detector):
@@ -39,7 +37,6 @@ class PretrainedYOLODetector(Detector):
         ]
 
     def _yolo_output_to_valid_representation_for_single_scene(self, yolo_outputs_for_single_scenes: torch.Tensor) -> List[Detection]:
-
         valid_yolo_detections = [
             self._detection_from_torchub_yolo_output(yolo_output)
             for yolo_output in yolo_outputs_for_single_scenes
@@ -69,5 +66,3 @@ class PretrainedYOLODetector(Detector):
         is_confidence_sufficient = confidence >= self.selected_classes[detected_class]["confidence_threshold"]
 
         return is_confidence_sufficient
-
-
