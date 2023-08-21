@@ -1,0 +1,16 @@
+name: "YOLODetector"
+yolo_detector_config:
+  torchhub_yolo_config:
+    repo_or_dir: "ultralytics/yolov5"
+    path: "../ultralytics_yolov5_master/yolov5s.pt"
+    source: "github"
+    model: "custom"
+    skip_validation: False
+    force_reload: False
+  selected_classes:
+    person:
+      class_id: 0
+      confidence_threshold: 0.5
+    ball:
+      class_id: 32
+      confidence_threshold: 0.5

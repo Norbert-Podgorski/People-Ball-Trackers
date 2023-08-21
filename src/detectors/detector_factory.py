@@ -1,15 +1,15 @@
 from typing import Dict, Callable, Any
 
 from src.detectors.detector import Detector
-from src.detectors.pretrained_yolo_detector import PretrainedYOLODetector
+from src.detectors.yolo_detector import YOLODetector
 
 
-def create_pretrained_yolo_detector(**detector_config: Dict[str, Any]) -> Detector:
-    return PretrainedYOLODetector(**detector_config["pretrained_yolo_detector_config"])
+def create_yolo_detector(**detector_config: Dict[str, Any]) -> Detector:
+    return YOLODetector(**detector_config["yolo_detector_config"])
 
 
 DETECTOR_CREATORS: Dict[str, Callable] = {
-    "PretrainedYOLODetector": create_pretrained_yolo_detector,
+    "YOLODetector": create_yolo_detector,
 }
 
 
