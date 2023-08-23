@@ -13,9 +13,21 @@ class FramesLoader:
         self.to_tensor_converter = transforms.ToTensor()
         self.resizer = transforms.Resize(resize)
 
-    def load_all_frames(self) -> torch.Tensor:
+    def load_all_frames(self, batch_size: int) -> torch.Tensor:
         frames_names = sorted(Path(self.frames_path).glob('*.jpg'), key=os.path.getmtime)
-        frames = torch.stack([self.resizer(self.to_tensor_converter(Image.open(frame_name))) for frame_name in frames_names])
+        frames_number = len(frames_names)
+        frames = []
+        batch_low_idx = 0
+        batch_high_idx = 0
+        while batch_high_idx <= frames_number:
+            batch_high_idx += batch_size
+            if batch_high_idx >= frames_number:
+                batch_high_idx = frames_number + 1
+            frames_names_for_batch = frames_names[batch_low_idx: batch_high_idx]
+            frames_for_batch = [self.resizer(self.to_tensor_converter(Image.open(frame_name))) for frame_name in frames_names_for_batch]
+            frames.extend(frames_for_batch)
+            batch_low_idx += batch_size
+        frames = torch.stack(frames)
         return frames
 
     def load_subset_frames(self, subset: int) -> torch.Tensor:

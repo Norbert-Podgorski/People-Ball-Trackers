@@ -24,6 +24,6 @@ def create_path_if_not_exists(path: str) -> None:
 
 
 if __name__ == "__main__":
-    destination = "example_data/test/frames/passes_run"
-    video = "example_data/test/recordings/passes_run.mp4"
+    destination = "../example_data/test/frames/passes_3"
+    video = "../example_data/test/recordings/passes_3.mp4"
     video_splitter(video_path=video, destination_path=destination)

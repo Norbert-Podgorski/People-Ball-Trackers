@@ -1,10 +1,12 @@
-batch_size: 10
+batch_size: 16
 frames_loader_config:
-  frames_path: "../example_data/test/frames/passes_1"
-  resize: [544, 960]
+  frames_path: "../example_data/test/frames/passes_3"
+  resize: [1088, 1920]
 detector_config_path: "../configs/trained_yolo_detector_config.yaml"
 visualizer_config:
-  frames_path: "../visualizations/frames/trained_yolo_detector/passes_1"
-  video_path: "../visualizations/video/trained_yolo_detector/passes_1"
+  frames_path: "../visualizations/frames/trained_yolo_detector/passes_3"
+  video_path: "../visualizations/video/trained_yolo_detector/passes_3"
   fps: 10
-  size: [960, 544]
+  size: [1920, 1088]
+logger_config:
+  path: "../visualizations/info/trained_yolo_detector/passes_3"
