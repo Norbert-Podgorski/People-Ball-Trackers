@@ -1,0 +1,4 @@
+name: "AlgorithmicDetector"
+base_detector_config_path: "../configs/trained_yolo_detector_config.yaml"
+distance_to_players: 10
+fps: 30

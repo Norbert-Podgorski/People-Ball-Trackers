@@ -10,7 +10,8 @@ from src.visualizer import Visualizer
 
 def detect(detector: Detector, frames_loader: FramesLoader, visualizer: Visualizer, logger: Logger) -> None:
     batch_size = config["batch_size"]
-    frames = frames_loader.load_all_frames(batch_size=batch_size)
+    # frames = frames_loader.load_all_frames(batch_size=batch_size)
+    frames = frames_loader.load_subset_frames(20)
     scenes_number = frames.shape[0]
     detections = []
     batch_low_idx = 0
@@ -21,6 +22,7 @@ def detect(detector: Detector, frames_loader: FramesLoader, visualizer: Visualiz
             batch_high_idx = scenes_number + 1
         batch = frames[batch_low_idx: batch_high_idx]
         batch_detections = detector.detect(batch)
+        print(batch_detections)
         detections.append(batch_detections)
         batch_low_idx += batch_size
     detections = [detection for detection_for_batch in detections for detection in detection_for_batch]

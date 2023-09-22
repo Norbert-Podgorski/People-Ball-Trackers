@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Optional
 
 import torch
 
@@ -16,3 +16,4 @@ class Detection(NamedTuple):
     bounding_box: torch.Tensor
     detected_class: str
     confidence: float
+    idx: Optional[int] = None
