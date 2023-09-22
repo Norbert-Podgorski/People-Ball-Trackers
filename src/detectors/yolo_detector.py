@@ -22,21 +22,16 @@ class YOLODetector(Detector):
         class_to_name_dict = {selected_classes[name]["class_id"]: name for name in selected_classes}
         return class_to_name_dict
 
-    def detect(self, images: torch.Tensor) -> List[List[Detection]]:
+    def detect(self, image: torch.Tensor) -> List[Detection]:
         # import straight from yolo repo, it must be here
         from utils.general import non_max_suppression
 
-        yolo_outputs = self.yolo(images)
-        yolo_outputs_for_all_scenes = non_max_suppression(yolo_outputs)
-        return self._yolo_output_to_valid_representation_for_all_scenes(yolo_outputs_for_all_scenes)
+        yolo_output = self.yolo(image.unsqueeze(dim=0))
+        yolo_output_nms = non_max_suppression(yolo_output)[0]
 
-    def _yolo_output_to_valid_representation_for_all_scenes(self, yolo_outputs_for_all_scenes: torch.Tensor) -> List[List[Detection]]:
-        return [
-            self._yolo_output_to_valid_representation_for_single_scene(yolo_outputs_for_single_scene)
-            for yolo_outputs_for_single_scene in yolo_outputs_for_all_scenes
-        ]
+        return self._yolo_output_to_valid_representation(yolo_output_nms)
 
-    def _yolo_output_to_valid_representation_for_single_scene(self, yolo_outputs_for_single_scenes: torch.Tensor) -> List[Detection]:
+    def _yolo_output_to_valid_representation(self, yolo_outputs_for_single_scenes: torch.Tensor) -> List[Detection]:
         valid_yolo_detections = [
             self._detection_from_torchub_yolo_output(yolo_output)
             for yolo_output in yolo_outputs_for_single_scenes
@@ -52,7 +47,7 @@ class YOLODetector(Detector):
         bounding_box_coordinates = torch.tensor([[min_x, min_y], [max_x, max_y]])
         detected_class = self.yolo_class_to_name.get(yolo_output[yolo_output_detected_class_index].item())
         confidence = yolo_output[yolo_output_confidence_index].item()
-        return Detection(bounding_box=bounding_box_coordinates, detected_class=detected_class, confidence=confidence)
+        return Detection(bounding_box=bounding_box_coordinates, confidence=confidence, detected_class=detected_class)
 
     def _is_yolo_detection_valid(self, detection: Detection) -> bool:
         detection_confidence_index = 4
