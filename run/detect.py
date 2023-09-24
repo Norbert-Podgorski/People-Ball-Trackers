@@ -10,8 +10,8 @@ from src.visualizer import Visualizer
 
 def detect(detector: Detector, frames_loader: FramesLoader, visualizer: Visualizer, logger: Logger) -> None:
     batch_size = config["batch_size"]
-    # frames = frames_loader.load_all_frames(batch_size=batch_size)
-    frames = frames_loader.load_subset_frames(2)
+    frames = frames_loader.load_all_frames(batch_size=batch_size)
+    # frames = frames_loader.load_subset_frames(100)
     detections = []
     for frame in frames:
         detections_for_frame = detector.detect(frame)

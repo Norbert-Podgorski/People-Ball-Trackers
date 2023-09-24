@@ -12,11 +12,21 @@ class Detector(abc.ABC):
     def detect(self, images: torch.Tensor) -> List[Detection]:
         pass
 
+
 @dataclasses.dataclass
 class Detection:
-    def __init__(self, bounding_box: torch.Tensor, confidence: float, detected_class: str,  idx: Optional[int] = None, size: Optional[torch.Tensor] = None):
+    def __init__(
+        self,
+        bounding_box: torch.Tensor,
+        confidence: float,
+        detected_class: str,
+        idx: Optional[int] = None,
+        size: Optional[torch.Tensor] = None,
+        last_frame_number: Optional[int] = None
+    ):
         self.bounding_box = bounding_box
         self.confidence = confidence
         self.detected_class = detected_class
-        self.idx = idx
         self.size = size
+        self.idx = idx
+        self.last_frame_number = last_frame_number

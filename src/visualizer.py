@@ -7,9 +7,18 @@ import torch
 
 from src.detectors.detector import Detection
 
-VISUALIZATION_COLORS: Dict[str, Tuple[int, int, int]] = {
-    "ball":   (255, 0, 0),
-    "person": (0, 0, 255)
+VISUALIZATION_COLORS: Dict[str, Dict[int, Tuple[int, int, int]]] = {
+    "ball":   {
+        0: (255, 0, 0),
+        1: (150, 0, 250),
+        None: (255, 0, 0)
+    },
+    "person": {
+        0: (0, 255, 0),
+        1: (0, 0, 255),
+        2: (0, 255, 255,),
+        None: (0, 255, 0)
+    }
 }
 
 
@@ -27,8 +36,8 @@ class Visualizer:
                 bbox = detection.bounding_box.to(torch.int32)
                 start_point = (bbox[0][0].item(), bbox[0][1].item())
                 end_point = (bbox[1][0].item(), bbox[1][1].item())
-                color = VISUALIZATION_COLORS[detection.detected_class]
-                thickness = 3
+                color = VISUALIZATION_COLORS[detection.detected_class][detection.idx]
+                thickness = 5
                 cv2.rectangle(frame, start_point, end_point, color, thickness)
             cv2.imwrite(f'{self.frames_path}/{frame_idx}.jpg', frame)
             self.writer.write(frame)

@@ -1,4 +1,4 @@
 name: "AlgorithmicDetector"
 base_detector_config_path: "../configs/trained_yolo_detector_config.yaml"
-ball_trust_area_scale: 1.0
+ball_trust_area_scale: 2.0
 people_trust_area_scale: 0.5

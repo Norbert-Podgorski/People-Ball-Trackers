@@ -9,7 +9,7 @@ torchhub_yolo_config:
 selected_classes:
   person:
     class_id: 0
-    confidence_threshold: 0.5
+    confidence_threshold: 0.25
   ball:
     class_id: 32
-    confidence_threshold: 0.5
+    confidence_threshold: 0.25
