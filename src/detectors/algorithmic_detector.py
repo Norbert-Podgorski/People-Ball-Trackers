@@ -11,16 +11,16 @@ class AlgorithmicDetector(Detector):
         self.base_detector = base_detector
         self.trust_area_scales: Dict[str, float] = {
             "ball": ball_trust_area_scale,
-            "people": people_trust_area_scale
+            "person": people_trust_area_scale
         }
-        self.last_detections: Dict[str, List[Detection]] = {"ball": [], "people": []}
+        self.last_detections: Dict[str, List[Detection]] = {"ball": [], "person": []}
 
     def detect(self, images: torch.Tensor) -> List[Detection]:
         base_detector_detections = self.base_detector.detect(images)
         ball_detections, people_detections = self._separate_detections(base_detector_detections)
         tracked_detections = []
-        new_last_detections = {"ball": [], "people": []}
-        if not self.last_detections:
+        new_last_detections = {"ball": [], "person": []}
+        if not (self.last_detections["ball"] and self.last_detections["person"]):
             self._save_first_detections(ball_detections, people_detections)
             return base_detector_detections
         else:
@@ -33,7 +33,8 @@ class AlgorithmicDetector(Detector):
                 tracked_detection = self._track_detection(detection)
                 if tracked_detection:
                     tracked_detections.append(tracked_detection)
-                    new_last_detections["people"].append(tracked_detection)
+                    new_last_detections["person"].append(tracked_detection)
+        return tracked_detections
 
     @staticmethod
     def _separate_detections(detections: List[Detection]) -> Tuple[List[Detection], List[Detection]]:
@@ -58,7 +59,7 @@ class AlgorithmicDetector(Detector):
                 )
             )
         for person_detection_idx, person_detection in enumerate(people_detections):
-            self.last_detections["people"].append(
+            self.last_detections["person"].append(
                 Detection(
                     bounding_box=person_detection.bounding_box,
                     confidence=person_detection.confidence,
@@ -69,12 +70,13 @@ class AlgorithmicDetector(Detector):
             )
 
     @staticmethod
-    def _calculate_box_size(bounding_box: Detection.bounding_box) -> np.ndarray:
+    def _calculate_box_size(bounding_box: torch.Tensor) -> torch.Tensor:
         size_x = bounding_box[1][0] - bounding_box[0][0]
         size_y = bounding_box[1][1] - bounding_box[0][1]
-        return np.array([size_x, size_y])
+        return torch.tensor([size_x, size_y])
 
     def _track_detection(self, detection: Detection) -> Optional[Detection]:
+        detection.size = self._calculate_box_size(detection.bounding_box)
         nearest_detection = self._find_nearest_detection(detection)
         if nearest_detection:
             updated_detection = Detection(
@@ -82,27 +84,27 @@ class AlgorithmicDetector(Detector):
                 confidence=detection.confidence,
                 detected_class=detection.detected_class,
                 idx=nearest_detection.idx,
-                size=self._calculate_box_size(detection.bounding_box)
+                size=detection.size
             )
             return updated_detection
 
     def _find_nearest_detection(self, detection: Detection) -> Optional[Detection]:
         min_distance = None
         nearest_detection = None
-        acceptable_distance = np.min(detection.size) * self.trust_area_scales[detection.detected_class]
-        for last_ball_detection in self.last_detections["ball"]:
+        acceptable_distance = torch.min(detection.size).item() * self.trust_area_scales[detection.detected_class]
+        for last_detection in self.last_detections[detection.detected_class]:
             first_center_x = np.mean([detection.bounding_box[1][0], detection.bounding_box[0][0]])
             first_center_y = np.mean([detection.bounding_box[1][1], detection.bounding_box[0][1]])
-            second_center_x = np.mean([last_ball_detection.bounding_box[1][0], last_ball_detection.bounding_box[0][0]])
-            second_center_y = np.mean([last_ball_detection.bounding_box[1][1], last_ball_detection.bounding_box[0][1]])
+            second_center_x = np.mean([last_detection.bounding_box[1][0], last_detection.bounding_box[0][0]])
+            second_center_y = np.mean([last_detection.bounding_box[1][1], last_detection.bounding_box[0][1]])
             distance_x = abs(first_center_x - second_center_x)
             distance_y = abs(first_center_y - second_center_y)
             if distance_x < acceptable_distance and distance_y < acceptable_distance:
                 lower_distance = min([distance_x, distance_y])
                 if min_distance is None:
                     min_distance = lower_distance
-                    nearest_detection = last_ball_detection
+                    nearest_detection = last_detection
                 elif lower_distance < min_distance:
                     min_distance = lower_distance
-                    nearest_detection = last_ball_detection
+                    nearest_detection = last_detection
         return nearest_detection

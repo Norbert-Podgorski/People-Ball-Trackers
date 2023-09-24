@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import abc
-from typing import NamedTuple, List, Optional
-
+from typing import List, Optional
+import dataclasses
 import numpy as np
 import torch
 
@@ -12,10 +12,11 @@ class Detector(abc.ABC):
     def detect(self, images: torch.Tensor) -> List[Detection]:
         pass
 
-
-class Detection(NamedTuple):
-    bounding_box: torch.Tensor
-    confidence: float
-    detected_class: str
-    idx: Optional[int] = None
-    size: Optional[np.ndarray] = None
+@dataclasses.dataclass
+class Detection:
+    def __init__(self, bounding_box: torch.Tensor, confidence: float, detected_class: str,  idx: Optional[int] = None, size: Optional[torch.Tensor] = None):
+        self.bounding_box = bounding_box
+        self.confidence = confidence
+        self.detected_class = detected_class
+        self.idx = idx
+        self.size = size
