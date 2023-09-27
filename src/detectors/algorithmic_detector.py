@@ -17,6 +17,7 @@ class AlgorithmicDetector(Detector):
         self.frame_number = 0
 
     def detect(self, images: torch.Tensor) -> List[Detection]:
+        print(self.frame_number)
         base_detector_detections = self.base_detector.detect(images)
         ball_detections, people_detections = self._separate_detections(base_detector_detections)
         tracked_detections = []

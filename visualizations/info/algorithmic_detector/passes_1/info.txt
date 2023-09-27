@@ -1,0 +1,8 @@
+The recording contains 244 scenes.
+Each shows two people and one ball.
+Detected: 
+People: 
+- 0: 244
+- 1: 244
+Balls: 
+- 0: 244
