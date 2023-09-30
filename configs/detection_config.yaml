@@ -1,12 +1,12 @@
 batch_size: 16
 frames_loader_config:
-  frames_path: "../example_data/test/frames/passes_3"
+  frames_path: "../example_data/test/frames/passes_2"
   resize: [1088, 1920]
 detector_config_path: "../configs/algorithmic_detector_config.yaml"
 visualizer_config:
-  frames_path: "../visualizations/frames/algorithmic_detector/passes_3"
-  video_path: "../visualizations/video/algorithmic_detector/passes_3"
+  frames_path: "../visualizations/frames/algorithmic_detector/passes_2"
+  video_path: "../visualizations/video/algorithmic_detector/passes_2"
   fps: 10
   size: [1920, 1088]
 logger_config:
-  path: "../visualizations/info/algorithmic_detector/passes_3"
+  path: "../visualizations/info/algorithmic_detector/passes_2"

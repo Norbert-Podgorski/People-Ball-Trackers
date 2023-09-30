@@ -22,21 +22,33 @@ class AlgorithmicDetector(Detector):
         ball_detections, people_detections = self._separate_detections(base_detector_detections)
         tracked_detections = []
         new_last_detections = {"ball": [], "person": []}
+        new_last_detections_idx =  {"ball": [], "person": []}
         if not self.last_detections["ball"] and not self.last_detections["person"]:
             tracked_detections = self._save_first_detections(ball_detections, people_detections)
             self.frame_number += 1
             return tracked_detections
         else:
+            print(self.frame_number)
             for detection in ball_detections:
+                print("Detection")
                 tracked_detection = self._track_detection(detection)
                 if tracked_detection:
+                    print("Tracked")
                     tracked_detections.append(tracked_detection)
+                    new_last_detections_idx["ball"].append(tracked_detection.idx)
                     new_last_detections["ball"].append(tracked_detection)
             for detection in people_detections:
                 tracked_detection = self._track_detection(detection)
                 if tracked_detection:
                     tracked_detections.append(tracked_detection)
+                    new_last_detections_idx["person"].append(tracked_detection.idx)
                     new_last_detections["person"].append(tracked_detection)
+
+        for key in ["ball", "person"]:
+            for detection in self.last_detections[key]:
+                if detection.idx not in new_last_detections_idx[key]:
+                    new_last_detections[key].append(detection)
+
         self.last_detections = new_last_detections
         self.frame_number += 1
         return tracked_detections
@@ -98,7 +110,7 @@ class AlgorithmicDetector(Detector):
             )
             return updated_detection
         else:
-            if detection.confidence >= 0.5:
+            if detection.confidence >= 0.7:
                 idx = self._find_first_available_idx(detection)
                 return Detection(
                 bounding_box=detection.bounding_box,
@@ -119,6 +131,7 @@ class AlgorithmicDetector(Detector):
             second_center_y = np.mean([last_detection.bounding_box[1][1], last_detection.bounding_box[0][1]])
             distance_x = abs(first_center_x - second_center_x)
             distance_y = abs(first_center_y - second_center_y)
+            print(acceptable_distance, distance_x, distance_y)
             if distance_x < acceptable_distance and distance_y < acceptable_distance:
                 acceptable_distance_detections.append(last_detection)
         most_accurate_detection = self._find_most_accurate_detection(detection, acceptable_distance_detections)
