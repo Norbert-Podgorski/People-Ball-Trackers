@@ -19,7 +19,7 @@
 ### WYNIKI - Algorithmic Detector (TRAINED YOLO CONFIDENCE THRESHOLD - 0.25):
 - PASSES_1: 244 klatki, 244 detekcje pierwszej osoby, 244 detekcje drugiej osoby, 244 detekcje piłek
 - PASSES_2: 342 klatki, 342 detekcje pierwszej osoby, 342 detekcje drugiej osoby, 283 detekcji piłek (59 false negative)
-- PASSES_3: 298 KLATEK, 294 detekcje pierwszej osoby (4 false negative), 296 detekcji drugiej osoby (2 false negative), 280 detekcji piłek (18 false negative)
+- PASSES_3: 298 klatek, 294 detekcje pierwszej osoby (4 false negative), 296 detekcji drugiej osoby (2 false negative), 280 detekcji piłek (18 false negative)
   
 <br><br>
 

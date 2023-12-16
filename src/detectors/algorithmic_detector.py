@@ -17,7 +17,6 @@ class AlgorithmicDetector(Detector):
         self.frame_number = 0
 
     def detect(self, images: torch.Tensor) -> List[Detection]:
-        print(self.frame_number)
         base_detector_detections = self.base_detector.detect(images)
         ball_detections, people_detections = self._separate_detections(base_detector_detections)
         tracked_detections = []
@@ -28,12 +27,9 @@ class AlgorithmicDetector(Detector):
             self.frame_number += 1
             return tracked_detections
         else:
-            print(self.frame_number)
             for detection in ball_detections:
-                print("Detection")
                 tracked_detection = self._track_detection(detection)
                 if tracked_detection:
-                    print("Tracked")
                     tracked_detections.append(tracked_detection)
                     new_last_detections_idx["ball"].append(tracked_detection.idx)
                     new_last_detections["ball"].append(tracked_detection)
@@ -131,7 +127,6 @@ class AlgorithmicDetector(Detector):
             second_center_y = np.mean([last_detection.bounding_box[1][1], last_detection.bounding_box[0][1]])
             distance_x = abs(first_center_x - second_center_x)
             distance_y = abs(first_center_y - second_center_y)
-            print(acceptable_distance, distance_x, distance_y)
             if distance_x < acceptable_distance and distance_y < acceptable_distance:
                 acceptable_distance_detections.append(last_detection)
         most_accurate_detection = self._find_most_accurate_detection(detection, acceptable_distance_detections)

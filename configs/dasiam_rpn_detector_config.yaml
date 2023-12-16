@@ -1,0 +1,3 @@
+name: "DaSiamRPNDetector"
+base_detector_config_path: "../configs/algorithmic_detector_config.yaml"
+path: "../pretrained_SiamRPN.model"
