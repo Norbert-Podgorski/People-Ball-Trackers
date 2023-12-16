@@ -9,7 +9,7 @@ import torch
 
 class Detector(abc.ABC):
     @abc.abstractmethod
-    def detect(self, images: torch.Tensor) -> List[Detection]:
+    def detect(self, image: torch.Tensor) -> List[Detection]:
         pass
 
 

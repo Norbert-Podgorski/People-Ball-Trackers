@@ -24,4 +24,9 @@
 <br><br>
 
 ## TO-DO:
-- DaSiam
+- Tworzenie osobnego modelu DaSiam dla piłek i dla pozy i osobno dla każdego ID (ze sprawdzaniem czy wszystkie dotychczasowe są i z dodawaniem nowych jak się pojawią)
+- Przerabianie Detection na DaSiamRPNTrackedObject
+- Przerobienie strategii gdy pojawia się nowa detekcja 
+- Przerobienie startegii gdy jest ciągłość predykcji
+- Testy na nagraniu testowym
+- Testy na końcowych nagraniach

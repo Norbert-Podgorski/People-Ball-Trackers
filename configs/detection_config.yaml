@@ -1,6 +1,6 @@
 batch_size: 16
 frames_loader_config:
-  frames_path: "../example_data/test/frames/passes_1"
+  frames_path: "../example_data/test/frames/dasiam_test_passes"
   resize: [1088, 1920]
 detector_config_path: "../configs/dasiam_rpn_detector_config.yaml"
 visualizer_config:

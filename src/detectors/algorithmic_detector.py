@@ -16,8 +16,8 @@ class AlgorithmicDetector(Detector):
         self.last_detections: Dict[str, List[Detection]] = {"ball": [], "person": []}
         self.frame_number = 0
 
-    def detect(self, images: torch.Tensor) -> List[Detection]:
-        base_detector_detections = self.base_detector.detect(images)
+    def detect(self, image: torch.Tensor) -> List[Detection]:
+        base_detector_detections = self.base_detector.detect(image)
         ball_detections, people_detections = self._separate_detections(base_detector_detections)
         tracked_detections = []
         new_last_detections = {"ball": [], "person": []}
