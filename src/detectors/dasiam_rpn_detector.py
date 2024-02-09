@@ -1,127 +1,152 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import List, Dict, Any, Tuple
 
 import numpy as np
 import torch
+import cv2
 
 from src.detectors.detector import Detector, Detection
 from src.dasiam_rpn_net.dasiam import net as dasiam_net
 from src.dasiam_rpn_net.dasiam import run_SiamRPN
 
 
-@dataclass
-class DaSiamRPNTrackedObject:
-    centers: np.ndarray
-    sizes: np.ndarray
+class DaSiamRPNTrackingStrategy(ABC):
+    STATE: Dict[str, Any] = {}
+    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot):
+        self.model: dasiam_net.SiamRPNvot = dasiam_rpn_model
 
-# class DaSiamRPNDetectorStrategy(ABC):
-#     def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot, states: List[Dict[str, Any]]):
-#         self.model: dasiam_net.SiamRPNvot = dasiam_rpn_model
-#         self.states: List[Dict[str, Any]] = states
-#
-#     @abstractmethod
-#     def dasiam_rpn_step(self, tracked_balls: TrackedBalls, scene: SceneData, camera_idx: int) -> None:
-#         pass
-#
-#     @abstractmethod
-#     def is_condition_satisfied(self, tracked_balls: TrackedBalls, camera_idx: int) -> bool:
-#         pass
-#
-#     @staticmethod
-#     def _get_image_size_wh(image_tensor: torch.Tensor) -> np.ndarray:
-#         image_size_hw = np.array(image_tensor.shape[1:])
-#         image_size_wh = image_size_hw[::-1]
-#         return image_size_wh
-#
-#     @staticmethod
-#     def _is_ball_found_by_base_tracker(balls_centers: np.ndarray, camera_idx: int) -> bool:
-#         ball_center = balls_centers[camera_idx]
-#         ball_center_contain_nans = np.any(np.isnan(ball_center))
-#         return not ball_center_contain_nans
-#
-#
-# class UpdatingDaSiamRPNStateStrategy(DaSiamRPNDetectorStrategy):
-#     def dasiam_rpn_step(self, tracked_balls: TrackedBalls, scene: SceneData, camera_idx: int) -> None:
-#         image = convert_tensor_image_to_numpy_bgr(scene.images[camera_idx])
-#
-#         image_size = self._get_image_size_wh(image_tensor=scene.images[camera_idx])
-#         camera_resolution = scene.cameras.resolution[camera_idx].cpu().numpy()
-#
-#         scaling_factor = image_size / camera_resolution
-#         center_position = tracked_balls.centers[camera_idx] * scaling_factor
-#         bbox_size = tracked_balls.sizes[camera_idx] * scaling_factor
-#
-#         new_state = run_SiamRPN.SiamRPN_init(image, center_position, bbox_size, self.model)
-#         self.states[camera_idx] = new_state
-#
-#     def is_condition_satisfied(self, tracked_balls: TrackedBalls, camera_idx: int) -> bool:
-#         ball_found_by_base_tracker = self._is_ball_found_by_base_tracker(tracked_balls.centers, camera_idx)
-#         return ball_found_by_base_tracker
-#
-#
-# class GettingPredictionFromDaSiamRPNStrategy(DaSiamRPNDetectorStrategy):
-#     def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot, states: List[Dict[str, Any]], score_threshold: float):
-#         super().__init__(dasiam_rpn_model, states)
-#         self.score_threshold: float = score_threshold
-#
-#     def dasiam_rpn_step(self, tracked_balls: TrackedBalls, scene: SceneData, camera_idx: int) -> None:
-#         image = convert_tensor_image_to_numpy_bgr(scene.images[camera_idx])
-#         new_state = run_SiamRPN.SiamRPN_track(self.states[camera_idx], image)
-#         self._try_fill_missing_ball_detection_with_tracked_ball(tracked_ball_state=new_state, detected_balls=tracked_balls, scene=scene, camera_idx=camera_idx)
-#         self.states[camera_idx] = new_state
-#
-#     def is_condition_satisfied(self, tracked_balls: TrackedBalls, camera_idx: int) -> bool:
-#         ball_not_found_by_base_tracker = not self._is_ball_found_by_base_tracker(tracked_balls.centers, camera_idx)
-#         ball_found_ever_before = self._is_ball_found_ever_before(camera_idx)
-#         return ball_not_found_by_base_tracker and ball_found_ever_before
-#
-#     def _try_fill_missing_ball_detection_with_tracked_ball(
-#         self, tracked_ball_state: Dict[str, Any], detected_balls: TrackedBalls, scene: SceneData, camera_idx: int
-#     ) -> None:
-#         image_size = self._get_image_size_wh(image_tensor=scene.images[camera_idx])
-#         camera_resolution = scene.cameras.resolution[camera_idx].cpu().numpy()
-#         if tracked_ball_state["score"] > self.score_threshold:
-#             scaling_factor = camera_resolution / image_size
-#             center_position = tracked_ball_state["target_pos"] * scaling_factor
-#             bbox_size = tracked_ball_state["target_sz"] * scaling_factor
-#             detected_balls.centers[camera_idx] = center_position
-#             detected_balls.sizes[camera_idx] = bbox_size
-#
-#     def _is_ball_found_ever_before(self, camera_idx: int) -> bool:
-#         return self.states[camera_idx] is not None
+    @abstractmethod
+    def dasiam_rpn_step(self, detected_ball: Detection, image: torch.Tensor) -> Detection:
+        pass
+
+    @abstractmethod
+    def is_condition_satisfied(self, detected_ball: Detection) -> bool:
+        pass
+
+    def convert_tensor_image_to_numpy_bgr(self, image: torch.Tensor) -> np.ndarray:
+        image_np_hwc = self.convert_tensor_image_chw_to_numpy_hwc(image)
+        image_bgr = cv2.cvtColor(image_np_hwc, cv2.COLOR_RGB2BGR)
+        return image_bgr
+
+
+    def convert_tensor_image_chw_to_numpy_hwc(self, image: torch.Tensor) -> np.ndarray:
+        image_np = np.round(image.cpu().numpy() * 255).astype("uint8")
+        return self.convert_from_chw_to_hwc(image_np)
+
+    @staticmethod
+    def convert_from_chw_to_hwc(image: np.ndarray) -> np.ndarray:
+        channel_dim = -3
+        height_dim = -2
+        width_dim = -1
+        converted_image = np.moveaxis(image, (height_dim, width_dim, channel_dim), (-3, -2, -1))
+        return converted_image
+
+    @staticmethod
+    def _is_ball_found_by_base_tracker(detected_ball: Detection) -> bool:
+        return detected_ball is not None
+
+
+class UpdatingDaSiamRPNStateStrategy(DaSiamRPNTrackingStrategy):
+    def dasiam_rpn_step(self, detected_ball: Detection, image: torch.Tensor) -> Detection:
+        image_np = self.convert_tensor_image_to_numpy_bgr(image)
+
+        center_x = (detected_ball.bounding_box[0][0] + detected_ball.bounding_box[1][0]) / 2
+        center_y = (detected_ball.bounding_box[0][1] + detected_ball.bounding_box[1][1]) / 2
+        bbox_center = np.array([center_x, center_y])
+        bbox_size = detected_ball.size.numpy()
+
+        new_state = run_SiamRPN.SiamRPN_init(image_np, bbox_center, bbox_size, self.model)
+        DaSiamRPNTrackingStrategy.STATE = new_state
+
+        return detected_ball
+
+    def is_condition_satisfied(self, detected_ball: Detection) -> bool:
+        ball_found_by_base_tracker = self._is_ball_found_by_base_tracker(detected_ball)
+        return ball_found_by_base_tracker
+
+
+class GettingPredictionFromDaSiamRPNStrategy(DaSiamRPNTrackingStrategy):
+    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot, score_threshold: float):
+        super().__init__(dasiam_rpn_model)
+        self.score_threshold: float = score_threshold
+
+    def dasiam_rpn_step(self, detected_ball: Detection, image: torch.Tensor) -> Detection:
+        image_np = self.convert_tensor_image_to_numpy_bgr(image)
+        new_state = run_SiamRPN.SiamRPN_track(DaSiamRPNTrackingStrategy.STATE, image_np)
+        DaSiamRPNTrackingStrategy.STATE = new_state
+        return  self._try_fill_missing_ball_detection_with_dasiam_ball(new_state)
+
+
+    def is_condition_satisfied(self, detected_ball: Detection) -> bool:
+        ball_not_found_by_base_tracker = not self._is_ball_found_by_base_tracker(detected_ball)
+        ball_found_ever_before = self._is_ball_found_ever_before()
+        return ball_not_found_by_base_tracker and ball_found_ever_before
+
+    def _try_fill_missing_ball_detection_with_dasiam_ball(self, dasiam_ball_state: Dict[str, Any]) -> Detection:
+        score = dasiam_ball_state["score"]
+        if score > self.score_threshold:
+            center_position = dasiam_ball_state["target_pos"]
+            bbox_size = dasiam_ball_state["target_sz"]
+            bbox_x_min = center_position[0] - bbox_size[0] / 2
+            bbox_x_max = center_position[0] + bbox_size[0] / 2
+            bbox_y_min = center_position[1] - bbox_size[1] / 2
+            bbox_y_max = center_position[1] + bbox_size[1] / 2
+            bbox = torch.tensor([[bbox_x_min, bbox_y_min], [bbox_x_max, bbox_y_max]])
+            detected_ball = Detection(bbox, score, "ball")
+            return detected_ball
+
+    def _is_ball_found_ever_before(self) -> bool:
+        return len(list(DaSiamRPNTrackingStrategy.STATE.keys())) != 0
+
 
 class DaSiamRPNDetector(Detector):
-    def __init__(self, base_detector: Detector, path: str):
+    def __init__(self, base_detector: Detector, path: str, score_threshold: float):
         self.base_detector = base_detector
-        self.ball_model: dasiam_net.SiamRPNvot = dasiam_net.SiamRPNvot()
-        self.ball_model.load_state_dict(torch.load(path))
-        self.people_model: dasiam_net.SiamRPNvot = dasiam_net.SiamRPNvot()
-        self.people_model.load_state_dict(torch.load(path))
+        self.model: dasiam_net.SiamRPNvot = dasiam_net.SiamRPNvot()
+        self.model.load_state_dict(torch.load(path))
+        self.scene_idx = 0
+
+        self.ball_tracking_strategies: List[DaSiamRPNTrackingStrategy] = [
+            UpdatingDaSiamRPNStateStrategy(dasiam_rpn_model=self.model),
+            GettingPredictionFromDaSiamRPNStrategy(dasiam_rpn_model=self.model, score_threshold=score_threshold)
+        ]
 
 
     def detect(self, image: torch.Tensor) -> List[Detection]:
         base_detector_detections = self.base_detector.detect(image)
-        ball_detections, people_detections = self._separate_detections(base_detector_detections)
-        print("\nBall Detetctions: ")
-        if ball_detections:
-            for detection in ball_detections:
-                if detection:
-                    print(detection.bounding_box)
+        ball_detection, people_detections = self._separate_detections(base_detector_detections)
+        print("\n", self.scene_idx)
+        if ball_detection:
+            print("Ball Detetction: ")
+            print(ball_detection.bounding_box)
+            print(ball_detection.size)
+            print(ball_detection.idx)
         else:
-            print(ball_detections)
-        # ball_detections = self._convert_detections_to_dasiam_tracked_objects(ball_detections)
+            print("No Ball")
+        self.scene_idx += 1
+
+        ball_detection = self._try_to_fill_missing_ball_detection(ball_detection, image)
+        all_detections = people_detections
+        if ball_detection:
+            all_detections.append(ball_detection)
+        return all_detections
 
 
     @staticmethod
-    def _separate_detections(detections: List[Detection]) -> Tuple[List[Detection], List[Detection]]:
-        ball_detections = []
+    def _separate_detections(detections: List[Detection]) -> Tuple[Detection, List[Detection]]:
+        ball_detection = None
         people_detections = []
         for detection in detections:
             if detection.detected_class == "ball":
-                ball_detections.append(detection)
+                ball_detection = detection
             else:
                 people_detections.append(detection)
-        return ball_detections, people_detections
+        return ball_detection, people_detections
 
-    # def _convert_detections_to_dasiam_tracked_objects(self, detections: List[Detection]):
+    def _try_to_fill_missing_ball_detection(self, detected_ball: Detection, image: torch.Tensor) -> Detection:
+        dasiam_ball_detection = None
+        for tracking_strategy in self.ball_tracking_strategies:
+            strategy_condition_is_satisfied = tracking_strategy.is_condition_satisfied(detected_ball=detected_ball)
+            if strategy_condition_is_satisfied:
+                dasiam_ball_detection = tracking_strategy.dasiam_rpn_step(detected_ball, image)
+        return dasiam_ball_detection
