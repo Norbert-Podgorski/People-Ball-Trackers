@@ -1,12 +1,12 @@
-batch_size: 16
+batch_size: 8
 frames_loader_config:
-  frames_path: "../example_data/test/frames/dasiam_test_passes"
+  frames_path: "../example_data/test/frames/passes_3"
   resize: [1088, 1920]
 detector_config_path: "../configs/dasiam_rpn_detector_config.yaml"
 visualizer_config:
-  frames_path: "../visualizations/frames/dasiam_rpn_detector/passes_1"
-  video_path: "../visualizations/video/dasiam_rpn_detector/passes_1"
+  frames_path: "../visualizations/frames/dasiam_rpn_detector/passes_3"
+  video_path: "../visualizations/video/dasiam_rpn_detector/passes_3"
   fps: 10
   size: [1920, 1088]
 logger_config:
-  path: "../visualizations/info/dasiam_rpn_detector/passes_1"
+  path: "../visualizations/info/dasiam_rpn_detector/passes_3"

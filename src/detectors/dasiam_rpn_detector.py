@@ -12,8 +12,9 @@ from src.dasiam_rpn_net.dasiam import run_SiamRPN
 
 class DaSiamRPNTrackingStrategy(ABC):
     STATE: Dict[str, Any] = {}
-    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot):
-        self.model: dasiam_net.SiamRPNvot = dasiam_rpn_model
+
+    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNBIG):
+        self.model: dasiam_net.SiamRPNBIG = dasiam_rpn_model
 
     @abstractmethod
     def dasiam_rpn_step(self, detected_ball: Detection, image: torch.Tensor) -> Detection:
@@ -27,7 +28,6 @@ class DaSiamRPNTrackingStrategy(ABC):
         image_np_hwc = self.convert_tensor_image_chw_to_numpy_hwc(image)
         image_bgr = cv2.cvtColor(image_np_hwc, cv2.COLOR_RGB2BGR)
         return image_bgr
-
 
     def convert_tensor_image_chw_to_numpy_hwc(self, image: torch.Tensor) -> np.ndarray:
         image_np = np.round(image.cpu().numpy() * 255).astype("uint8")
@@ -66,7 +66,7 @@ class UpdatingDaSiamRPNStateStrategy(DaSiamRPNTrackingStrategy):
 
 
 class GettingPredictionFromDaSiamRPNStrategy(DaSiamRPNTrackingStrategy):
-    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNvot, score_threshold: float):
+    def __init__(self, dasiam_rpn_model: dasiam_net.SiamRPNBIG, score_threshold: float):
         super().__init__(dasiam_rpn_model)
         self.score_threshold: float = score_threshold
 
@@ -74,8 +74,7 @@ class GettingPredictionFromDaSiamRPNStrategy(DaSiamRPNTrackingStrategy):
         image_np = self.convert_tensor_image_to_numpy_bgr(image)
         new_state = run_SiamRPN.SiamRPN_track(DaSiamRPNTrackingStrategy.STATE, image_np)
         DaSiamRPNTrackingStrategy.STATE = new_state
-        return  self._try_fill_missing_ball_detection_with_dasiam_ball(new_state)
-
+        return self._try_fill_missing_ball_detection_with_dasiam_ball(new_state)
 
     def is_condition_satisfied(self, detected_ball: Detection) -> bool:
         ball_not_found_by_base_tracker = not self._is_ball_found_by_base_tracker(detected_ball)
@@ -92,45 +91,34 @@ class GettingPredictionFromDaSiamRPNStrategy(DaSiamRPNTrackingStrategy):
             bbox_y_min = center_position[1] - bbox_size[1] / 2
             bbox_y_max = center_position[1] + bbox_size[1] / 2
             bbox = torch.tensor([[bbox_x_min, bbox_y_min], [bbox_x_max, bbox_y_max]])
-            detected_ball = Detection(bbox, score, "ball")
+            detected_ball = Detection(bbox, score, "ball", idx=0)
             return detected_ball
 
-    def _is_ball_found_ever_before(self) -> bool:
+    @staticmethod
+    def _is_ball_found_ever_before() -> bool:
         return len(list(DaSiamRPNTrackingStrategy.STATE.keys())) != 0
 
 
 class DaSiamRPNDetector(Detector):
     def __init__(self, base_detector: Detector, path: str, score_threshold: float):
         self.base_detector = base_detector
-        self.model: dasiam_net.SiamRPNvot = dasiam_net.SiamRPNvot()
-        self.model.load_state_dict(torch.load(path))
-        self.scene_idx = 0
-
+        self.model: dasiam_net.SiamRPNBIG = dasiam_net.SiamRPNBIG()
+        self.model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        self.model.eval()
         self.ball_tracking_strategies: List[DaSiamRPNTrackingStrategy] = [
             UpdatingDaSiamRPNStateStrategy(dasiam_rpn_model=self.model),
             GettingPredictionFromDaSiamRPNStrategy(dasiam_rpn_model=self.model, score_threshold=score_threshold)
         ]
 
-
     def detect(self, image: torch.Tensor) -> List[Detection]:
         base_detector_detections = self.base_detector.detect(image)
         ball_detection, people_detections = self._separate_detections(base_detector_detections)
-        print("\n", self.scene_idx)
-        if ball_detection:
-            print("Ball Detetction: ")
-            print(ball_detection.bounding_box)
-            print(ball_detection.size)
-            print(ball_detection.idx)
-        else:
-            print("No Ball")
-        self.scene_idx += 1
 
         ball_detection = self._try_to_fill_missing_ball_detection(ball_detection, image)
         all_detections = people_detections
         if ball_detection:
             all_detections.append(ball_detection)
         return all_detections
-
 
     @staticmethod
     def _separate_detections(detections: List[Detection]) -> Tuple[Detection, List[Detection]]:
