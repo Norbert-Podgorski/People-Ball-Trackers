@@ -2,6 +2,10 @@
 
 <br>
 
+#### SiamRPNBIG.model can be downloaded from [Google Drive.](https://drive.google.com/drive/folders/1BtIkp5pB6aqePQGlMb2_Z7bfPy6XEj6H)
+
+<br>
+
 ## NOTATKI
 
 ### WYNIKI - YOLO (CONFIDENCE THRESHOLD - 0.5):
