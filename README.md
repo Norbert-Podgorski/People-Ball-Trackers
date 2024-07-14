@@ -1,4 +1,7 @@
 # People-Ball-Trackers
+
+An algorithm for detecting and tracking the movement of soccer players (or people in general) and the ball using YOLO and DaSiamRPN networks.
+
 <br>
 
 #### SiamRPNBIG.model can be downloaded from [Google Drive.](https://drive.google.com/drive/folders/1BtIkp5pB6aqePQGlMb2_Z7bfPy6XEj6H)
