@@ -1,34 +1,30 @@
 # People-Ball-Trackers
-
 <br>
 
 #### SiamRPNBIG.model can be downloaded from [Google Drive.](https://drive.google.com/drive/folders/1BtIkp5pB6aqePQGlMb2_Z7bfPy6XEj6H)
 
 <br>
 
-## NOTATKI
-
-### WYNIKI - YOLO (CONFIDENCE THRESHOLD - 0.5):
+## NOTES
+### RESULTS - YOLO (CONFIDENCE THRESHOLD - 0.5):
 #### PRETRAINED:
-- PASSES_1: 244 klatki, 489 detekcji ludzi (1 false positive - klatka nr 133, pozostałe true positive), 227 detekcji piłek (17 false negative)
-- PASSES_2: 342 klatki, 684 detekcje ludzi (wszystkie true positive), 235 detekcji piłek (107 false negetive)
-- PASSES_3: 298 klatek, 589 detekcji ludzi (7 połączonych detekcji - traktowane jako brak predykcji czyli 14 false negative, pozostałe true positive), 264 detekcje piłek (34 false negative)
+PASSES_1: 244 frames, 489 human detections (1 false positive - frame no. 133, the rest true positives), 227 ball detections (17 false negatives)
+PASSES_2: 342 frames, 684 human detections (all true positives), 235 ball detections (107 false negatives)
+PASSES_3: 298 frames, 589 human detections (7 combined detections - treated as no predictions, thus 14 false negatives, the rest true positives), 264 ball detections (34 false negatives)
 #### TRAINED:
-- PASSES_1: 244 klatki, 488 detekcji ludzi (wszystkie true positive), 240 detekcji piłek (0 false positive, 4 false negative)
-- PASSES_2: 342 klatki, 684 detekcje ludzi (wszystkie true positive), 265 detekcji piłek (0 false positive, 77 false negetive)
-- PASSES_3: 298 klatek, 589 detekcji ludzi (7 połączonych detekcji - traktowane jako brak predykcji czyli 14 false negative, pozostałe true positive), 273 detekcje piłek (25 false negative)
-
+PASSES_1: 244 frames, 488 human detections (all true positives), 240 ball detections (0 false positives, 4 false negatives)
+PASSES_2: 342 frames, 684 human detections (all true positives), 265 ball detections (0 false positives, 77 false negatives)
+PASSES_3: 298 frames, 589 human detections (7 combined detections - treated as no predictions, thus 14 false negatives, the rest true positives), 273 ball detections (25 false negatives)
 <br>
 
-### WYNIKI - Algorithmic Detector (TRAINED YOLO CONFIDENCE THRESHOLD - 0.25):
-- PASSES_1: 244 klatki, 244 detekcje pierwszej osoby, 244 detekcje drugiej osoby, 244 detekcje piłek
-- PASSES_2: 342 klatki, 342 detekcje pierwszej osoby, 342 detekcje drugiej osoby, 283 detekcji piłek (59 false negative)
-- PASSES_3: 298 klatek, 294 detekcje pierwszej osoby (4 false negative), 296 detekcji drugiej osoby (2 false negative), 280 detekcji piłek (18 false negative)
-  
+### RESULTS - Algorithmic Detector (TRAINED YOLO CONFIDENCE THRESHOLD - 0.25):
+PASSES_1: 244 frames, 244 detections of the first person, 244 detections of the second person, 244 ball detections
+PASSES_2: 342 frames, 342 detections of the first person, 342 detections of the second person, 283 ball detections (59 false negatives)
+PASSES_3: 298 frames, 294 detections of the first person (4 false negatives), 296 detections of the second person (2 false negatives), 280 ball detections (18 false negatives)
 <br>
 
+### RESULTS - DaSiamRPN Detector (TRAINED YOLO CONFIDENCE THRESHOLD - 0.25, SCORE THRESHOLD - 0.95):
+PASSES_1: 244 frames, 244 detections of the first person, 244 detections of the second person, 244 ball detections
+PASSES_2: 342 frames, 342 detections of the first person, 342 detections of the second person, 320 ball detections (22 false negatives)
+PASSES_3: 298 frames, 294 detections of the first person (4 false negatives), 296 detections of the second person (2 false negatives), 293 ball detections (5 false negatives)
 
-### WYNIKI - DaSiamRPN Detector (TRAINED YOLO CONFIDENCE THRESHOLD - 0.25, SCORE THRESHOLD - 0.95):
-- PASSES_1: 244 klatki, 244 detekcje pierwszej osoby, 244 detekcje drugiej osoby, 244 detekcje piłek
-- PASSES_2: 342 klatki, 342 detekcje pierwszej osoby, 342 detekcje drugiej osoby,  320 detekcji piłek (22 false negative)
-- PASSES_3: 298 klatek, 294 detekcje pierwszej osoby (4 false negative), 296 detekcji drugiej osoby (2 false negative), 293 detekcje piłek (5 false negative)
